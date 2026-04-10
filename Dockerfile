@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
@@ -8,4 +8,4 @@ RUN chmod +x mvnw
 
 RUN ./mvnw clean install -DskipTests
 
-CMD ["java", "-jar", "target/CATALOGO.jar"]
+CMD ["java", "-jar", "target/catalogo-0.0.1-SNAPSHOT.jar"]
