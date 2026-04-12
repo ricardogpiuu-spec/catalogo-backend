@@ -186,7 +186,7 @@ public class ProdutoController {
         if (imagemCliente != null) {
             mockupUrl +=
                     "l_" + imagemCliente +
-                            ",w_130,h_190,c_fit" +   // 🔥 TAMANHO DA ARTE
+                            ",w_150,h_300,c_fit" +   // 🔥 TAMANHO DA ARTE
                             ",e_distort:0:0:300:20:280:180:20:160" + // 🔥 CURVATURA
                             ",g_center" +            // 🔥 CENTRALIZA
                             ",x_20,y_10" +
@@ -200,7 +200,7 @@ public class ProdutoController {
             String textoFormatado = texto.replace(" ", "%20");
             mockupUrl +=
                     "l_text:Arial_30:" + textoFormatado +
-                            ",co_black,g_south,y_10/"; // 🔥 texto embaixo
+                            ",co_black,g_south,y_0/"; // 🔥 texto embaixo
         }
 
 
