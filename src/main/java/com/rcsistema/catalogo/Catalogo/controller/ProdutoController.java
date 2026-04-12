@@ -186,7 +186,7 @@ public class ProdutoController {
         if (imagemCliente != null) {
             mockupUrl +=
                     "l_" + imagemCliente +
-                            ",w_300,h_150,c_fit" +   // 🔥 TAMANHO DA ARTE
+                            ",w_130,h_190,c_fit" +   // 🔥 TAMANHO DA ARTE
                             ",e_distort:0:0:300:20:280:180:20:160" + // 🔥 CURVATURA
                             ",g_center" +            // 🔥 CENTRALIZA
                             ",x_20,y_10" +
