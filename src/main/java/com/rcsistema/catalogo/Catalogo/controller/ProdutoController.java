@@ -192,7 +192,7 @@ public class ProdutoController {
             transform =
                     "l_" + imagemCliente +
                             ",w_160,h_180,c_scale" + // 🔥 tamanho padrão
-                            ",x_0,y_20" +
+                            ",x_0,y_10" +
                             ",g_center" +            // 🔥 centralizado
                             ",e_distort:0:0:300:20:280:180:20:160" +
                             ",e_multiply" +
