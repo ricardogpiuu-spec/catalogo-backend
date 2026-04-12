@@ -186,9 +186,10 @@ public class ProdutoController {
         if (imagemCliente != null) {
             mockupUrl +=
                     "l_" + imagemCliente +
-                            ",w_600,h_300,c_fit" +   // 🔥 TAMANHO DA ARTE
+                            ",w_280,h_200,c_fit" +   // 🔥 TAMANHO DA ARTE
                             ",g_center" +            // 🔥 CENTRALIZA
-                            ",x_0,y_30" +            // 🔥 AJUSTE FINO POSIÇÃO
+                            ",x_0,y_10" +
+                            ",e_multiply" +  // 🔥 AJUSTE FINO POSIÇÃO
                             "/";
         }
 
@@ -197,8 +198,8 @@ public class ProdutoController {
         if (texto != null && !texto.isEmpty()) {
             String textoFormatado = texto.replace(" ", "%20");
             mockupUrl +=
-                    "l_text:Arial_40:" + textoFormatado +
-                            ",co_white,g_south,y_40/"; // 🔥 texto embaixo
+                    "l_text:Arial_30:" + textoFormatado +
+                            ",co_black,g_south,y_10/"; // 🔥 texto embaixo
         }
 
 
