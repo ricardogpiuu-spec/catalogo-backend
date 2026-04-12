@@ -2,7 +2,9 @@ package com.rcsistema.catalogo.Catalogo.controller;
 
 import com.rcsistema.catalogo.Catalogo.dto.ProdutoResposivedto;
 import com.rcsistema.catalogo.Catalogo.dto.ProdutoResquestDto;
+import com.rcsistema.catalogo.Catalogo.model.Pedidos;
 import com.rcsistema.catalogo.Catalogo.model.Produto;
+import com.rcsistema.catalogo.Catalogo.repository.PedidoRepository;
 import com.rcsistema.catalogo.Catalogo.repository.ProdutoRepository;
 import com.rcsistema.catalogo.Catalogo.service.CloudinaryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class ProdutoController {
     private ProdutoRepository repository;
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     @GetMapping
@@ -146,6 +151,54 @@ public class ProdutoController {
 
         return new ProdutoResposivedto(atualizado);
     }
-}
+
+    @PostMapping("/mockup")
+    public String gerarMockup(
+            @RequestParam String produtoId,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String imageUrl
+
+    ) {
+
+        Produto produto = repository.findById(produtoId)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        String imagemCliente = null;
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            imagemCliente = imageUrl
+                    .replace("https://res.cloudinary.com/dyvec4jx4/image/upload/", "");
+        }
+
+        String baseImage = produto.getImagem()
+                .replace("https://res.cloudinary.com/dyvec4jx4/image/upload/", "");
+
+        String cloudName = "dyvec4jx4";
+
+        String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
+
+        if (imagemCliente != null) {
+            mockupUrl += "l_" + imagemCliente + ",w_300,g_center/";
+        }
+
+        if (texto != null && !texto.isEmpty()) {
+            String textoFormatado = java.net.URLEncoder.encode(texto, java.nio.charset.StandardCharsets.UTF_8);
+            mockupUrl += "l_text:Arial_40:" + textoFormatado + ",co_white,g_south/";
+        }
+
+        mockupUrl += baseImage;
+        Pedidos pedidos = new Pedidos();
+        pedidos.setProdutoId(produtoId);
+        pedidos.setTexto(texto);
+        pedidos.setImagem(imageUrl);
+        pedidos.setMockupUrl(mockupUrl);
+
+        pedidoRepository.save(pedidos);
+
+        return mockupUrl;
+    }
+
+    }
+
 
 
