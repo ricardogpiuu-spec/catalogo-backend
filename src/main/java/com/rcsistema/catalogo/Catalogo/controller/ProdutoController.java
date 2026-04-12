@@ -167,11 +167,13 @@ public class ProdutoController {
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             imagemCliente = imageUrl
-                    .replace("https://res.cloudinary.com/dyvec4jx4/image/upload/", "");
+                    .split("/upload/")[1]   // pega depois do upload/
+                    .replaceAll("^v\\d+/", ""); // remove versão
         }
 
         String baseImage = produto.getImagem()
-                .replace("https://res.cloudinary.com/dyvec4jx4/image/upload/", "");
+                .split("/upload/")[1]
+                .replaceAll("^v\\d+/", "");
 
         String cloudName = "dyvec4jx4";
 
@@ -182,7 +184,7 @@ public class ProdutoController {
         }
 
         if (texto != null && !texto.isEmpty()) {
-            String textoFormatado = java.net.URLEncoder.encode(texto, java.nio.charset.StandardCharsets.UTF_8);
+            String textoFormatado = texto.replace(" ", "%20");
             mockupUrl += "l_text:Arial_40:" + textoFormatado + ",co_white,g_south/";
         }
 
