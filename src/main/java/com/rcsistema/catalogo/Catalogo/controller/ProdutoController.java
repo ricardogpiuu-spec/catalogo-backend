@@ -191,13 +191,11 @@ public class ProdutoController {
         if (imagemCliente != null) {
             transform =
                     "l_" + imagemCliente +
-                            ",w_180,h_180,c_fill,g_auto" +
-                            ",r_20" +
-
-
+                            ",w_180,h_180,c_fill,g_auto" + // 🔥 tamanho padrão
+                            ",g_center" +            // 🔥 centralizado
+                            ",x_0,y_10" +
                             ",e_distort:0:0:300:20:280:180:20:160" +
                             ",e_multiply" +
-                            ",x_0,y_10" +
                             "/";
         }
 
