@@ -206,7 +206,7 @@ public class ProdutoController {
                     "l_" + imagemCliente +
                             ",w_" + finalW +
                             ",h_" + finalH +
-                            ",c_fit" +
+                            ",c_scale" +   // 🔥 AQUI MUDA TUDO
                             ",x_" + finalX +
                             ",y_" + finalY +
                             ",g_north_west" +
