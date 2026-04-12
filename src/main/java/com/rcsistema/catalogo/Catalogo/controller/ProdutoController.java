@@ -182,6 +182,19 @@ public class ProdutoController {
         String baseImage = produto.getImagem()
                 .split("/upload/")[1]
                 .replaceAll("^v\\d+/", "");
+        // 🔥 CONVERTE STRING PRA INT
+        int posX = x != null ? Integer.parseInt(x) : 0;
+        int posY = y != null ? Integer.parseInt(y) : 0;
+        int w = width != null ? Integer.parseInt(width) : 100;
+        int h = height != null ? Integer.parseInt(height) : 100;
+
+// 🔥 ESCALA (AJUSTA ISSO)
+        double escala = 3.0;
+
+        int finalX = (int) (posX * escala);
+        int finalY = (int) (posY * escala);
+        int finalW = (int) (w * escala);
+        int finalH = (int) (h * escala);
 
         // 🔥 MONTA MOCKUP
         String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
@@ -191,11 +204,11 @@ public class ProdutoController {
         if (imagemCliente != null) {
             transform =
                     "l_" + imagemCliente +
-                            ",w_" + width +
-                            ",h_" + height +
+                            ",w_" + finalW +
+                            ",h_" + finalH +
                             ",c_fit" +
-                            ",x_" + x +
-                            ",y_" + y +
+                            ",x_" + finalX +
+                            ",y_" + finalY +
                             ",g_north_west" +
                             ",e_distort:0:0:300:20:280:180:20:160" +
                             ",e_multiply" +
