@@ -184,14 +184,23 @@ public class ProdutoController {
 
         // 🔥 IMAGEM DO CLIENTE NA CANECA (AJUSTE PROFISSIONAL)
         if (imagemCliente != null) {
-            mockupUrl += "l_" + imagemCliente + ",w_600,h_260,c_fill,g_center,x_40,y_10,e_multiply/";
+            mockupUrl +=
+                    "l_" + imagemCliente +
+                            ",w_600,h_300,c_fit" +   // 🔥 TAMANHO DA ARTE
+                            ",g_center" +            // 🔥 CENTRALIZA
+                            ",x_0,y_30" +            // 🔥 AJUSTE FINO POSIÇÃO
+                            "/";
         }
+
 
         // 🔥 TEXTO
         if (texto != null && !texto.isEmpty()) {
             String textoFormatado = texto.replace(" ", "%20");
-            mockupUrl += "l_text:Arial_40:" + textoFormatado + ",co_white,g_south,y_20/";
+            mockupUrl +=
+                    "l_text:Arial_40:" + textoFormatado +
+                            ",co_white,g_south,y_40/"; // 🔥 texto embaixo
         }
+
 
         // 🔥 FINALIZA COM IMAGEM BASE
         mockupUrl += baseImage;
