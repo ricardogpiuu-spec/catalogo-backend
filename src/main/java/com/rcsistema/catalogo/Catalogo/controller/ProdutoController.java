@@ -156,7 +156,11 @@ public class ProdutoController {
     public String gerarMockup(
             @RequestParam String produtoId,
             @RequestParam(required = false) String texto,
-            @RequestParam(required = false) String imageUrl
+            @RequestParam(required = false) String imageUrl,
+            @RequestParam(required = false) String x,
+            @RequestParam(required = false) String y,
+            @RequestParam(required = false) String width,
+            @RequestParam(required = false) String height
 
     ) {
 
@@ -182,19 +186,23 @@ public class ProdutoController {
         // 🔥 MONTA MOCKUP
         String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
 
-        // 🔥 IMAGEM DO CLIENTE NA CANECA (AJUSTE PROFISSIONAL)
+        String transform = "";
+
         if (imagemCliente != null) {
-            mockupUrl +=
+            transform =
                     "l_" + imagemCliente +
-                            ",w_150,h_300,c_fit" +   // 🔥 TAMANHO DA ARTE
-                            ",e_distort:0:0:300:20:280:180:20:160" + // 🔥 CURVATURA
-                            ",g_center" +            // 🔥 CENTRALIZA
-                            ",x_20,y_10" +
-                            ",e_multiply" +  // 🔥 AJUSTE FINO POSIÇÃO
+                            ",w_" + width +
+                            ",h_" + height +
+                            ",c_fit" +
+                            ",x_" + x +
+                            ",y_" + y +
+                            ",g_north_west" +
+                            ",e_distort:0:0:300:20:280:180:20:160" +
+                            ",e_multiply" +
                             "/";
         }
 
-
+        mockupUrl += transform;
         // 🔥 TEXTO
         if (texto != null && !texto.isEmpty()) {
             String textoFormatado = texto.replace(" ", "%20");
