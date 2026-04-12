@@ -163,39 +163,47 @@ public class ProdutoController {
         Produto produto = repository.findById(produtoId)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
+        String cloudName = "dyvec4jx4";
+
+        // 🔥 PEGA IMAGEM DO CLIENTE (SEM URL COMPLETA)
         String imagemCliente = null;
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             imagemCliente = imageUrl
-                    .split("/upload/")[1]   // pega depois do upload/
-                    .replaceAll("^v\\d+/", ""); // remove versão
+                    .split("/upload/")[1]
+                    .replaceAll("^v\\d+/", "");
         }
 
+        // 🔥 IMAGEM BASE DO PRODUTO (CANECA)
         String baseImage = produto.getImagem()
                 .split("/upload/")[1]
                 .replaceAll("^v\\d+/", "");
 
-        String cloudName = "dyvec4jx4";
-
+        // 🔥 MONTA MOCKUP
         String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
 
+        // 🔥 IMAGEM DO CLIENTE NA CANECA (AJUSTE PROFISSIONAL)
         if (imagemCliente != null) {
-            mockupUrl += "l_" + imagemCliente + ",w_300,g_center/";
+            mockupUrl += "l_" + imagemCliente + ",w_600,h_260,c_fill,g_center,x_40,y_10,e_multiply/";
         }
 
+        // 🔥 TEXTO
         if (texto != null && !texto.isEmpty()) {
             String textoFormatado = texto.replace(" ", "%20");
-            mockupUrl += "l_text:Arial_40:" + textoFormatado + ",co_white,g_south/";
+            mockupUrl += "l_text:Arial_40:" + textoFormatado + ",co_white,g_south,y_20/";
         }
 
+        // 🔥 FINALIZA COM IMAGEM BASE
         mockupUrl += baseImage;
-        Pedidos pedidos = new Pedidos();
-        pedidos.setProdutoId(produtoId);
-        pedidos.setTexto(texto);
-        pedidos.setImagem(imageUrl);
-        pedidos.setMockupUrl(mockupUrl);
 
-        pedidoRepository.save(pedidos);
+        // 🔥 SALVA PEDIDO
+        Pedidos pedido = new Pedidos();
+        pedido.setProdutoId(produtoId);
+        pedido.setTexto(texto);
+        pedido.setImagem(imagemCliente);
+        pedido.setMockupUrl(mockupUrl);
+
+        pedidoRepository.save(pedido);
 
         return mockupUrl;
     }
