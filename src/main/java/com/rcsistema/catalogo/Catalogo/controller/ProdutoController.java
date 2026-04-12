@@ -156,11 +156,8 @@ public class ProdutoController {
     public String gerarMockup(
             @RequestParam String produtoId,
             @RequestParam(required = false) String texto,
-            @RequestParam(required = false) String imageUrl,
-            @RequestParam(required = false) String x,
-            @RequestParam(required = false) String y,
-            @RequestParam(required = false) String width,
-            @RequestParam(required = false) String height
+            @RequestParam(required = false) String imageUrl
+
 
     ) {
 
@@ -182,19 +179,9 @@ public class ProdutoController {
         String baseImage = produto.getImagem()
                 .split("/upload/")[1]
                 .replaceAll("^v\\d+/", "");
-        // 🔥 CONVERTE STRING PRA INT
-        int posX = x != null ? Integer.parseInt(x) : 0;
-        int posY = y != null ? Integer.parseInt(y) : 0;
-        int w = width != null ? Integer.parseInt(width) : 100;
-        int h = height != null ? Integer.parseInt(height) : 100;
 
-// 🔥 ESCALA (AJUSTA ISSO)
-        double escala = 3.0;
 
-        int finalX = (int) (posX * escala);
-        int finalY = (int) (posY * escala);
-        int finalW = (int) (w * escala);
-        int finalH = (int) (h * escala);
+
 
         // 🔥 MONTA MOCKUP
         String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
@@ -204,12 +191,8 @@ public class ProdutoController {
         if (imagemCliente != null) {
             transform =
                     "l_" + imagemCliente +
-                            ",w_" + finalW +
-                            ",h_" + finalH +
-                            ",c_scale" +   // 🔥 AQUI MUDA TUDO
-                            ",x_" + finalX +
-                            ",y_" + finalY +
-                            ",g_north_west" +
+                            ",w_180,h_150,c_scale" + // 🔥 tamanho padrão
+                            ",g_center" +            // 🔥 centralizado
                             ",e_distort:0:0:300:20:280:180:20:160" +
                             ",e_multiply" +
                             "/";
