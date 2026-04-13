@@ -191,10 +191,7 @@ public class ProdutoController {
         if (imagemCliente != null) {
             transform =
                     "l_" + imagemCliente +
-                            ",w_300,h_300,c_fill,g_auto" +
-
-                            ",x_0,y_10" +
-                            "/";
+                            ",w_300,h_300,c_fill/" ;
         }
 
         mockupUrl += transform;
