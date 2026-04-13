@@ -192,7 +192,7 @@ public class ProdutoController {
             transform =
                     "l_" + imagemCliente +
                             ",w_300,h_300,c_fill,g_auto" +
-                            ",r_20" +
+
                             ",x_0,y_10" +
                             "/";
         }
