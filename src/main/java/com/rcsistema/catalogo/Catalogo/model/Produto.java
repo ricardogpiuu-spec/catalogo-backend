@@ -18,6 +18,7 @@ public class Produto {
 
     private String title;
     private String imagem;
+    private Double precoAntigo;
     private Double preco;
 
     private String publicId; // 🔥 ADICIONE ISSO
@@ -26,6 +27,7 @@ public class Produto {
 
         this.imagem = data.imagem();
         this.preco = data.preco();
+        this.precoAntigo = data.precoAntigo();
         this.title = data.title();
     }
 }

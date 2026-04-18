@@ -52,11 +52,15 @@ public class ProdutoController {
     public ProdutoResposivedto saveProduto(
             @RequestParam("title") String title,
             @RequestParam("preco") String precoStr,
+            @RequestParam("precoAntigo") String precoString,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
 
         Double preco = Double.parseDouble(precoStr.replace(",", "."));
+        Double precoantigo = precoString.isBlank()
+                ? 0.0
+                : Double.parseDouble(precoString.replace(",", "."));
 
         String finalImage;
         String publicId = null;
@@ -80,11 +84,12 @@ public class ProdutoController {
         Produto produto = new Produto();
         produto.setTitle(title);
         produto.setPreco(preco);
+        produto.setPrecoAntigo(precoantigo);
         produto.setImagem(finalImage); // ✅ CORRETO
         produto.setPublicId(publicId); // 🔥 SALVA ISSO
 
         Produto salvo = repository.save(produto);
-
+        System.out.println(precoString);
         log.info("Produto salvo: {} com ID {}", salvo.getTitle(), salvo.getId());
 
         return new ProdutoResposivedto(salvo);
@@ -113,6 +118,7 @@ public class ProdutoController {
             @PathVariable String id,
             @RequestParam("title") String title,
             @RequestParam("preco") String precoStr,
+            @RequestParam("precoAntigo") String precoString,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
@@ -121,6 +127,7 @@ public class ProdutoController {
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         Double preco = Double.parseDouble(precoStr.replace(",", "."));
+        Double precoantigo = Double.parseDouble(precoString.replace(",", "."));
 
         String finalImage = produto.getImagem();
         String publicId = produto.getPublicId(); // 🔥 importante
@@ -145,6 +152,7 @@ public class ProdutoController {
 
         produto.setTitle(title);
         produto.setPreco(preco);
+        produto.setPrecoAntigo(precoantigo);
         produto.setImagem(finalImage);
         produto.setPublicId(publicId); // ✅ agora correto
         Produto atualizado = repository.save(produto);
@@ -152,7 +160,7 @@ public class ProdutoController {
         return new ProdutoResposivedto(atualizado);
     }
 
-    @PostMapping("/mockup")
+   // @PostMapping("/mockup")
     public String gerarMockup(
             @RequestParam String produtoId,
             @RequestParam(required = false) String texto,
@@ -191,7 +199,7 @@ public class ProdutoController {
         if (imagemCliente != null) {
             transform =
                     "l_" + imagemCliente +
-                            ",w_300,h_300,c_fill/" ;
+                            ",w_700,h_700,c_fill/" ;
         }
 
         mockupUrl += transform;
