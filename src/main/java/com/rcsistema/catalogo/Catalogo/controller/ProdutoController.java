@@ -53,14 +53,18 @@ public class ProdutoController {
             @RequestParam("title") String title,
             @RequestParam("preco") String precoStr,
             @RequestParam("precoAntigo") String precoString,
+            @RequestParam(value="badge", required=false) String badgeString,
+            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
 
         Double preco = Double.parseDouble(precoStr.replace(",", "."));
-        Double precoantigo = precoString.isBlank()
-                ? 0.0
-                : Double.parseDouble(precoString.replace(",", "."));
+        Double precoantigo = 0.0;
+
+        if (precoString != null && !precoString.isBlank()) {
+            precoantigo = Double.parseDouble(precoString.replace(",", "."));
+        }
 
         String finalImage;
         String publicId = null;
@@ -84,12 +88,14 @@ public class ProdutoController {
         Produto produto = new Produto();
         produto.setTitle(title);
         produto.setPreco(preco);
-        produto.setPrecoAntigo(precoantigo);
+       produto.setPrecoAntigo(precoantigo);
+        produto.setBadge(badgeString);
+        produto.setTextoOferta(textoOfertaString);
         produto.setImagem(finalImage); // ✅ CORRETO
         produto.setPublicId(publicId); // 🔥 SALVA ISSO
 
         Produto salvo = repository.save(produto);
-        System.out.println(precoString);
+
         log.info("Produto salvo: {} com ID {}", salvo.getTitle(), salvo.getId());
 
         return new ProdutoResposivedto(salvo);
@@ -118,7 +124,9 @@ public class ProdutoController {
             @PathVariable String id,
             @RequestParam("title") String title,
             @RequestParam("preco") String precoStr,
-            @RequestParam("precoAntigo") String precoString,
+
+            @RequestParam(value = "precoAntigo", required = false) String precoString,
+
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
@@ -127,22 +135,24 @@ public class ProdutoController {
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         Double preco = Double.parseDouble(precoStr.replace(",", "."));
-        Double precoantigo = Double.parseDouble(precoString.replace(",", "."));
+
+        Double precoantigo = null;
+
+        if (precoString != null && !precoString.isBlank()) {
+            precoantigo = Double.parseDouble(precoString.replace(",", "."));
+        }
 
         String finalImage = produto.getImagem();
-        String publicId = produto.getPublicId(); // 🔥 importante
+        String publicId = produto.getPublicId();
 
-        // 🔥 se enviou nova imagem
         if (file != null && !file.isEmpty()) {
 
-            // 🔥 deleta antiga
             if (publicId != null) {
                 cloudinaryService.deleteFile(publicId);
             }
 
             var upload = cloudinaryService.uploadFile(file);
 
-            // 🔥 sobe nova imagem
             finalImage = upload.get("secure_url").toString();
             publicId = upload.get("public_id").toString();
 
@@ -152,9 +162,13 @@ public class ProdutoController {
 
         produto.setTitle(title);
         produto.setPreco(preco);
+
+        // 🔥 SE NÃO MANDOU preço antigo = remove promoção
         produto.setPrecoAntigo(precoantigo);
+
         produto.setImagem(finalImage);
-        produto.setPublicId(publicId); // ✅ agora correto
+        produto.setPublicId(publicId);
+
         Produto atualizado = repository.save(produto);
 
         return new ProdutoResposivedto(atualizado);
