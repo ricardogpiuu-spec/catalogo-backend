@@ -126,7 +126,8 @@ public class ProdutoController {
             @RequestParam("preco") String precoStr,
 
             @RequestParam(value = "precoAntigo", required = false) String precoString,
-
+            @RequestParam(value="badge", required=false) String badgeString,
+            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
@@ -165,7 +166,8 @@ public class ProdutoController {
 
         // 🔥 SE NÃO MANDOU preço antigo = remove promoção
         produto.setPrecoAntigo(precoantigo);
-
+        produto.setBadge(badgeString);
+        produto.setTextoOferta(textoOfertaString);
         produto.setImagem(finalImage);
         produto.setPublicId(publicId);
 
