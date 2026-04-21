@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.util.ArrayList;
 import java.util.List;
 @CrossOrigin(origins = "*")
 @RestController
@@ -53,8 +54,9 @@ public class ProdutoController {
             @RequestParam("title") String title,
             @RequestParam("preco") String precoStr,
             @RequestParam("precoAntigo") String precoString,
-            @RequestParam(value="badge", required=false) String badgeString,
-            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
+            @RequestParam(value = "badge", required = false) String badgeString,
+            @RequestParam(value = "textoOferta", required = false) String textoOfertaString,
+            @RequestParam(value = "imagens", required = false) List<String> imagens,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
@@ -66,35 +68,41 @@ public class ProdutoController {
             precoantigo = Double.parseDouble(precoString.replace(",", "."));
         }
 
-        String finalImage;
         String publicId = null;
 
+        // se não veio lista, cria vazia
+        if (imagens == null) {
+            imagens = new ArrayList<>();
+        }
+
+        // upload arquivo principal
         if (file != null && !file.isEmpty()) {
 
             var upload = cloudinaryService.uploadFile(file);
 
-             finalImage = upload.get("secure_url").toString();
-            //finalImage = cloudinaryService.uploadFile(file); // ✅
-             publicId = upload.get("public_id").toString();
+            String finalImage = upload.get("secure_url").toString();
+            publicId = upload.get("public_id").toString();
+
+            imagens.add(finalImage);
 
         } else if (imageUrl != null && !imageUrl.isEmpty()) {
 
-            finalImage = imageUrl;
+            imagens.add(imageUrl);
 
-        } else {
+        }
+
+        if (imagens.isEmpty()) {
             throw new RuntimeException("Imagem obrigatória");
         }
 
         Produto produto = new Produto();
         produto.setTitle(title);
         produto.setPreco(preco);
-       produto.setPrecoAntigo(precoantigo);
+        produto.setPrecoAntigo(precoantigo);
         produto.setBadge(badgeString);
         produto.setTextoOferta(textoOfertaString);
-        // AQUI O SEGREDO
-        produto.setImagens(List.of(finalImage));
-        // ✅ CORRETO
-        produto.setPublicId(publicId); // 🔥 SALVA ISSO
+        produto.setImagens(imagens);
+        produto.setPublicId(publicId);
 
         Produto salvo = repository.save(produto);
 
@@ -102,7 +110,6 @@ public class ProdutoController {
 
         return new ProdutoResposivedto(salvo);
     }
-
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     @DeleteMapping("/{id}")
     public void deleteProduto(@PathVariable String id) {
