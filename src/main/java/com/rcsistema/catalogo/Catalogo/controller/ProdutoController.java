@@ -91,7 +91,7 @@ public class ProdutoController {
        produto.setPrecoAntigo(precoantigo);
         produto.setBadge(badgeString);
         produto.setTextoOferta(textoOfertaString);
-        produto.setImagem(finalImage); // ✅ CORRETO
+        produto.setImagens(List.of(finalImage)); // ✅ CORRETO
         produto.setPublicId(publicId); // 🔥 SALVA ISSO
 
         Produto salvo = repository.save(produto);
@@ -143,7 +143,7 @@ public class ProdutoController {
             precoantigo = Double.parseDouble(precoString.replace(",", "."));
         }
 
-        String finalImage = produto.getImagem();
+        String finalImage = produto.getImagens().get(0);
         String publicId = produto.getPublicId();
 
         if (file != null && !file.isEmpty()) {
@@ -168,7 +168,7 @@ public class ProdutoController {
         produto.setPrecoAntigo(precoantigo);
         produto.setBadge(badgeString);
         produto.setTextoOferta(textoOfertaString);
-        produto.setImagem(finalImage);
+        produto.setImagens(List.of(finalImage));
         produto.setPublicId(publicId);
 
         Produto atualizado = repository.save(produto);
@@ -176,13 +176,11 @@ public class ProdutoController {
         return new ProdutoResposivedto(atualizado);
     }
 
-   // @PostMapping("/mockup")
+    @PostMapping("/mockup")
     public String gerarMockup(
             @RequestParam String produtoId,
             @RequestParam(required = false) String texto,
             @RequestParam(required = false) String imageUrl
-
-
     ) {
 
         Produto produto = repository.findById(produtoId)
@@ -190,7 +188,7 @@ public class ProdutoController {
 
         String cloudName = "dyvec4jx4";
 
-        // 🔥 PEGA IMAGEM DO CLIENTE (SEM URL COMPLETA)
+        // 🔥 IMAGEM CLIENTE
         String imagemCliente = null;
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -199,37 +197,35 @@ public class ProdutoController {
                     .replaceAll("^v\\d+/", "");
         }
 
-        // 🔥 IMAGEM BASE DO PRODUTO (CANECA)
-        String baseImage = produto.getImagem()
+        // 🔥 PEGA PRIMEIRA IMAGEM DA LISTA
+        String baseImage = produto.getImagens().get(0)
                 .split("/upload/")[1]
                 .replaceAll("^v\\d+/", "");
 
-
-
-
-        // 🔥 MONTA MOCKUP
-        String mockupUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/";
+        // 🔥 URL BASE
+        String mockupUrl =
+                "https://res.cloudinary.com/" + cloudName + "/image/upload/";
 
         String transform = "";
 
+        // 🔥 FOTO CLIENTE
         if (imagemCliente != null) {
-            transform =
+            transform +=
                     "l_" + imagemCliente +
-                            ",w_700,h_700,c_fill/" ;
+                            ",w_700,h_700,c_fill/";
         }
 
-        mockupUrl += transform;
         // 🔥 TEXTO
         if (texto != null && !texto.isEmpty()) {
             String textoFormatado = texto.replace(" ", "%20");
-            mockupUrl +=
+
+            transform +=
                     "l_text:Arial_30:" + textoFormatado +
-                            ",co_black,g_south,y_0/"; // 🔥 texto embaixo
+                            ",co_black,g_south,y_0/";
         }
 
-
-        // 🔥 FINALIZA COM IMAGEM BASE
-        mockupUrl += baseImage;
+        // 🔥 MONTA FINAL
+        mockupUrl += transform + baseImage;
 
         // 🔥 SALVA PEDIDO
         Pedidos pedido = new Pedidos();

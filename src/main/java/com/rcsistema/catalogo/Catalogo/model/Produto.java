@@ -5,6 +5,8 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @Getter
 @NoArgsConstructor
@@ -17,7 +19,7 @@ public class Produto {
     private String id;
 
     private String title;
-    private String imagem;
+    private List<String> imagens;
     private Double precoAntigo;
     private Double preco;
     private String badge;
@@ -27,7 +29,7 @@ public class Produto {
 
     public Produto(ProdutoResquestDto data){
 
-        this.imagem = data.imagem();
+        this.imagens = data.imagens();
         this.preco = data.preco();
         this.precoAntigo = data.precoAntigo();
         this.title = data.title();

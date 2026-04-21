@@ -1,6 +1,8 @@
 package com.rcsistema.catalogo.Catalogo.dto;
 
-public record ProdutoResquestDto(String title,String imagem,
+import java.util.List;
+
+public record ProdutoResquestDto(String title, List<String> imagens,
                                  Double preco, Double precoAntigo, String badge,
                                  String textoOferta) {
 }
