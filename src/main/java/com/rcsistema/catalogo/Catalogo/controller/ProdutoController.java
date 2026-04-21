@@ -1,74 +1,84 @@
 package com.rcsistema.catalogo.Catalogo.controller;
 
 import com.rcsistema.catalogo.Catalogo.dto.ProdutoResposivedto;
+import com.rcsistema.catalogo.Catalogo.dto.ProdutoResquestDto;
 import com.rcsistema.catalogo.Catalogo.model.Pedidos;
 import com.rcsistema.catalogo.Catalogo.model.Produto;
 import com.rcsistema.catalogo.Catalogo.repository.PedidoRepository;
 import com.rcsistema.catalogo.Catalogo.repository.ProdutoRepository;
 import com.rcsistema.catalogo.Catalogo.service.CloudinaryService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.util.List;
-
-@RestController
-@RequestMapping("/produtos")
 @CrossOrigin(origins = "*")
-public class ProdutoController {
+@RestController
+@RequestMapping("produtos")
 
+public class ProdutoController {
+    private static final Logger log = LoggerFactory.getLogger(ProdutoController.class);
     @Autowired
     private ProdutoRepository repository;
-
     @Autowired
     private CloudinaryService cloudinaryService;
 
     @Autowired
     private PedidoRepository pedidoRepository;
 
-    // =====================================
-    // LISTAR
-    // =====================================
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @GetMapping
+
     public List<ProdutoResposivedto> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(ProdutoResposivedto::new)
-                .toList();
+
+        List<ProdutoResposivedto> produtoList = repository.findAll().stream().map(ProdutoResposivedto::new).toList();
+        return produtoList;
     }
 
-    // =====================================
-    // CRIAR
-    // =====================================
+    // @PostMapping
+    // public void saveProduto(@RequestBody ProdutoResquestDto data) {
+    // System.out.println("Recebido: " + produtoData.getTitle());
+    //Produto novo = repository.save(produto);
+    // Produto produtoData = new Produto(data);
+    //repository.save(produtoData);
+    // return;
+
+    //}
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping
     public ProdutoResposivedto saveProduto(
-            @RequestParam String title,
-            @RequestParam String preco,
-            @RequestParam(required = false) String precoAntigo,
-            @RequestParam(required = false) String badge,
-            @RequestParam(required = false) String textoOferta,
-            @RequestParam(required = false) MultipartFile file,
-            @RequestParam(required = false) String imageUrl
+            @RequestParam("title") String title,
+            @RequestParam("preco") String precoStr,
+            @RequestParam("precoAntigo") String precoString,
+            @RequestParam(value="badge", required=false) String badgeString,
+            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
 
-        Double valorPreco = Double.parseDouble(preco.replace(",", "."));
-        Double valorAntigo = 0.0;
+        Double preco = Double.parseDouble(precoStr.replace(",", "."));
+        Double precoantigo = 0.0;
 
-        if (precoAntigo != null && !precoAntigo.isBlank()) {
-            valorAntigo = Double.parseDouble(precoAntigo.replace(",", "."));
+        if (precoString != null && !precoString.isBlank()) {
+            precoantigo = Double.parseDouble(precoString.replace(",", "."));
         }
 
         String finalImage;
         String publicId = null;
 
         if (file != null && !file.isEmpty()) {
+
             var upload = cloudinaryService.uploadFile(file);
 
-            finalImage = upload.get("secure_url").toString();
-            publicId = upload.get("public_id").toString();
+             finalImage = upload.get("secure_url").toString();
+            //finalImage = cloudinaryService.uploadFile(file); // ✅
+             publicId = upload.get("public_id").toString();
 
-        } else if (imageUrl != null && !imageUrl.isBlank()) {
+        } else if (imageUrl != null && !imageUrl.isEmpty()) {
+
             finalImage = imageUrl;
 
         } else {
@@ -76,46 +86,63 @@ public class ProdutoController {
         }
 
         Produto produto = new Produto();
-
         produto.setTitle(title);
-        produto.setPreco(valorPreco);
-        produto.setPrecoAntigo(valorAntigo);
-        produto.setBadge(badge);
-        produto.setTextoOferta(textoOferta);
-
-        // 🔥 LISTA DE IMAGENS
-        produto.setImagens(List.of(finalImage));
-
-        produto.setPublicId(publicId);
+        produto.setPreco(preco);
+       produto.setPrecoAntigo(precoantigo);
+        produto.setBadge(badgeString);
+        produto.setTextoOferta(textoOfertaString);
+        // AQUI O SEGREDO
+        produto.setImagens(List.of(imageUrl));
+        // ✅ CORRETO
+        produto.setPublicId(publicId); // 🔥 SALVA ISSO
 
         Produto salvo = repository.save(produto);
+
+        log.info("Produto salvo: {} com ID {}", salvo.getTitle(), salvo.getId());
 
         return new ProdutoResposivedto(salvo);
     }
 
-    // =====================================
-    // EDITAR
-    // =====================================
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    @DeleteMapping("/{id}")
+    public void deleteProduto(@PathVariable String id) {
+
+        Produto produto = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        // 🔥 deletar imagem do Cloudinary (se tiver)
+        if (produto.getPublicId() != null) {
+            cloudinaryService.deleteFile(produto.getPublicId());
+        }
+
+        repository.deleteById(id);
+
+        log.info("Produto deletado: {}", id);
+    }
+
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PutMapping("/{id}")
     public ProdutoResposivedto updateProduto(
             @PathVariable String id,
-            @RequestParam String title,
-            @RequestParam String preco,
-            @RequestParam(required = false) String precoAntigo,
-            @RequestParam(required = false) String badge,
-            @RequestParam(required = false) String textoOferta,
-            @RequestParam(required = false) MultipartFile file,
-            @RequestParam(required = false) String imageUrl
+            @RequestParam("title") String title,
+            @RequestParam("preco") String precoStr,
+
+            @RequestParam(value = "precoAntigo", required = false) String precoString,
+            @RequestParam(value="badge", required=false) String badgeString,
+            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "imageUrl", required = false) String imageUrl
     ) {
 
         Produto produto = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        Double valorPreco = Double.parseDouble(preco.replace(",", "."));
+        Double preco = Double.parseDouble(precoStr.replace(",", "."));
 
-        Double valorAntigo = 0.0;
-        if (precoAntigo != null && !precoAntigo.isBlank()) {
-            valorAntigo = Double.parseDouble(precoAntigo.replace(",", "."));
+        Double precoantigo = null;
+
+        if (precoString != null && !precoString.isBlank()) {
+            precoantigo = Double.parseDouble(precoString.replace(",", "."));
         }
 
         String finalImage = produto.getImagens().get(0);
@@ -129,20 +156,21 @@ public class ProdutoController {
 
             var upload = cloudinaryService.uploadFile(file);
 
-            finalImage = upload.get("secure_url").toString();
+            imageUrl = upload.get("secure_url").toString();
             publicId = upload.get("public_id").toString();
 
-        } else if (imageUrl != null && !imageUrl.isBlank()) {
+        } else if (imageUrl != null && !imageUrl.isEmpty()) {
             finalImage = imageUrl;
         }
 
         produto.setTitle(title);
-        produto.setPreco(valorPreco);
-        produto.setPrecoAntigo(valorAntigo);
-        produto.setBadge(badge);
-        produto.setTextoOferta(textoOferta);
+        produto.setPreco(preco);
 
-        produto.setImagens(List.of(finalImage));
+        // 🔥 SE NÃO MANDOU preço antigo = remove promoção
+        produto.setPrecoAntigo(precoantigo);
+        produto.setBadge(badgeString);
+        produto.setTextoOferta(textoOfertaString);
+        produto.setImagens(List.of(imageUrl));
         produto.setPublicId(publicId);
 
         Produto atualizado = repository.save(produto);
@@ -150,19 +178,70 @@ public class ProdutoController {
         return new ProdutoResposivedto(atualizado);
     }
 
-    // =====================================
-    // DELETAR
-    // =====================================
-    @DeleteMapping("/{id}")
-    public void deleteProduto(@PathVariable String id) {
+    @PostMapping("/mockup")
+    public String gerarMockup(
+            @RequestParam String produtoId,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String imageUrl
+    ) {
 
-        Produto produto = repository.findById(id)
+        Produto produto = repository.findById(produtoId)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        if (produto.getPublicId() != null) {
-            cloudinaryService.deleteFile(produto.getPublicId());
+        String cloudName = "dyvec4jx4";
+
+        // 🔥 IMAGEM CLIENTE
+        String imagemCliente = null;
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            imagemCliente = imageUrl
+                    .split("/upload/")[1]
+                    .replaceAll("^v\\d+/", "");
         }
 
-        repository.deleteById(id);
+        // 🔥 PEGA PRIMEIRA IMAGEM DA LISTA
+        String baseImage = produto.getImagens().get(0)
+                .split("/upload/")[1]
+                .replaceAll("^v\\d+/", "");
+
+        // 🔥 URL BASE
+        String mockupUrl =
+                "https://res.cloudinary.com/" + cloudName + "/image/upload/";
+
+        String transform = "";
+
+        // 🔥 FOTO CLIENTE
+        if (imagemCliente != null) {
+            transform +=
+                    "l_" + imagemCliente +
+                            ",w_700,h_700,c_fill/";
+        }
+
+        // 🔥 TEXTO
+        if (texto != null && !texto.isEmpty()) {
+            String textoFormatado = texto.replace(" ", "%20");
+
+            transform +=
+                    "l_text:Arial_30:" + textoFormatado +
+                            ",co_black,g_south,y_0/";
+        }
+
+        // 🔥 MONTA FINAL
+        mockupUrl += transform + baseImage;
+
+        // 🔥 SALVA PEDIDO
+        Pedidos pedido = new Pedidos();
+        pedido.setProdutoId(produtoId);
+        pedido.setTexto(texto);
+        pedido.setImagem(imagemCliente);
+        pedido.setMockupUrl(mockupUrl);
+
+        pedidoRepository.save(pedido);
+
+        return mockupUrl;
     }
-}
+
+    }
+
+
+
