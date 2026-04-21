@@ -92,7 +92,7 @@ public class ProdutoController {
         produto.setBadge(badgeString);
         produto.setTextoOferta(textoOfertaString);
         // AQUI O SEGREDO
-        produto.setImagens(List.of(imageUrl));
+        produto.setImagens(List.of(finalImage));
         // ✅ CORRETO
         produto.setPublicId(publicId); // 🔥 SALVA ISSO
 
@@ -170,7 +170,7 @@ public class ProdutoController {
         produto.setPrecoAntigo(precoantigo);
         produto.setBadge(badgeString);
         produto.setTextoOferta(textoOfertaString);
-        produto.setImagens(List.of(imageUrl));
+        produto.setImagens(List.of(finalImage));
         produto.setPublicId(publicId);
 
         Produto atualizado = repository.save(produto);
