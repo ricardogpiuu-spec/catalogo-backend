@@ -131,60 +131,25 @@ public class ProdutoController {
     @PutMapping("/{id}")
     public ProdutoResposivedto updateProduto(
             @PathVariable String id,
-            @RequestParam("title") String title,
-            @RequestParam("preco") String precoStr,
-
-            @RequestParam(value = "precoAntigo", required = false) String precoString,
-            @RequestParam(value="badge", required=false) String badgeString,
-            @RequestParam(value="textoOferta", required=false) String textoOfertaString,
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam(value = "imageUrl", required = false) String imageUrl
+            @RequestBody Produto dados
     ) {
 
         Produto produto = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        Double preco = Double.parseDouble(precoStr.replace(",", "."));
+        produto.setTitle(dados.getTitle());
+        produto.setPreco(dados.getPreco());
+        produto.setPrecoAntigo(dados.getPrecoAntigo());
+        produto.setBadge(dados.getBadge());
+        produto.setTextoOferta(dados.getTextoOferta());
 
-        Double precoantigo = null;
-
-        if (precoString != null && !precoString.isBlank()) {
-            precoantigo = Double.parseDouble(precoString.replace(",", "."));
-        }
-
-        String finalImage = produto.getImagens().get(0);
-        String publicId = produto.getPublicId();
-
-        if (file != null && !file.isEmpty()) {
-
-            if (publicId != null) {
-                cloudinaryService.deleteFile(publicId);
-            }
-
-            var upload = cloudinaryService.uploadFile(file);
-
-            imageUrl = upload.get("secure_url").toString();
-            publicId = upload.get("public_id").toString();
-
-        } else if (imageUrl != null && !imageUrl.isEmpty()) {
-            finalImage = imageUrl;
-        }
-
-        produto.setTitle(title);
-        produto.setPreco(preco);
-
-        // 🔥 SE NÃO MANDOU preço antigo = remove promoção
-        produto.setPrecoAntigo(precoantigo);
-        produto.setBadge(badgeString);
-        produto.setTextoOferta(textoOfertaString);
-        produto.setImagens(List.of(finalImage));
-        produto.setPublicId(publicId);
+        // SALVA TODAS IMAGENS
+        produto.setImagens(dados.getImagens());
 
         Produto atualizado = repository.save(produto);
 
         return new ProdutoResposivedto(atualizado);
     }
-
     @PostMapping("/mockup")
     public String gerarMockup(
             @RequestParam String produtoId,
